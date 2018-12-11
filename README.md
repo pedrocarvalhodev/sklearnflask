@@ -20,6 +20,11 @@ python main.py <port>
 
 # Endpoints
 ### /predict (POST)
+
+```
+python3 predict.py
+```
+
 Returns an array of predictions given a JSON object representing independent variables. Here's a sample input:
 ```
 [
