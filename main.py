@@ -11,11 +11,11 @@ from sklearn.externals import joblib
 app = Flask(__name__)
 
 # inputs
-training_data = 'data/titanic.csv'
+training_data = '/home/pedro/repos/ml_web_api/sklearnflask/data/titanic.csv'
 include = ['Age', 'Sex', 'Embarked', 'Survived']
 dependent_variable = include[-1]
 
-model_directory = 'model'
+model_directory = '/home/pedro/repos/ml_web_api/sklearnflask/model'
 model_file_name = '%s/model.pkl' % model_directory
 model_columns_file_name = '%s/model_columns.pkl' % model_directory
 
@@ -35,19 +35,19 @@ def predict():
             # Thanks to @lorenzori
             query = query.reindex(columns=model_columns, fill_value=0)
 
-            prediction = list(clf.predict(query))
-
+            #prediction = list(clf.predict(query))
+            prediction = clf.predict(query).tolist()
             return jsonify({'prediction': prediction})
 
-        except Exception, e:
+        except Exception as e:
 
             return jsonify({'error': str(e), 'trace': traceback.format_exc()})
     else:
-        print 'train first'
+        print('train first')
         return 'no model here'
 
 
-@app.route('/train', methods=['GET'])
+@app.route('/train', methods=['GET']) # http://0.0.0.0:8888/train
 def train():
     # using random forest as an example
     # can do the training separately and just update the pickles
@@ -79,8 +79,8 @@ def train():
     clf = rf()
     start = time.time()
     clf.fit(x, y)
-    print 'Trained in %.1f seconds' % (time.time() - start)
-    print 'Model training score: %s' % clf.score(x, y)
+    print('Trained in %.1f seconds' % (time.time() - start))
+    print('Model training score: %s' % clf.score(x, y))
 
     joblib.dump(clf, model_file_name)
 
@@ -94,27 +94,27 @@ def wipe():
         os.makedirs(model_directory)
         return 'Model wiped'
 
-    except Exception, e:
-        print str(e)
+    except Exception as e:
+        print(str(e))
         return 'Could not remove and recreate the model directory'
 
 
 if __name__ == '__main__':
     try:
         port = int(sys.argv[1])
-    except Exception, e:
+    except Exception as e:
         port = 80
 
     try:
         clf = joblib.load(model_file_name)
-        print 'model loaded'
+        print('model loaded')
         model_columns = joblib.load(model_columns_file_name)
-        print 'model columns loaded'
+        print('model columns loaded')
 
-    except Exception, e:
-        print 'No model here'
-        print 'Train first'
-        print str(e)
+    except Exception as e:
+        print('No model here')
+        print('Train first')
+        print(str(e))
         clf = None
 
     app.run(host='0.0.0.0', port=port, debug=True)
